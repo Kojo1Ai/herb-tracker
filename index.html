@@ -5,6 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Herb Tracker</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <style>
+    body {
+      background: #f6fdf8;
+      color: #333;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    header.hero {
+      background: url("https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
+      color: white;
+      text-align: center;
+      padding: 6rem 1rem;
+      border-radius: 0 0 1rem 1rem;
+    }
+    header.hero h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    }
+    header.hero p {
+      font-size: 1.25rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    }
+    .search-bar {
+      margin: 2rem 0;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .card-content {
+      padding: 1rem;
+    }
+    .card-content h3 {
+      margin-top: 0;
+      color: #2e7d32;
+    }
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      padding: 2rem 0;
+      background: #2e7d32;
+      color: white;
+      border-radius: 1rem 1rem 0 0;
+    }
+    footer a {
+      color: #c8e6c9;
+    }
+    /* Modal Styles */
+    dialog {
+      max-width: 600px;
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    dialog img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 <body>
 
@@ -15,47 +91,33 @@
     </ul>
     <ul>
       <li><a href="#">Home</a></li>
-      <li><a href="#">Herb Library</a></li>
-      <li><a href="#" role="button">Subscribe</a></li>
+      <li><a href="#">Library</a></li>
+      <li><a href="#subscribe" role="button">Subscribe</a></li>
     </ul>
   </nav>
 
+  <!-- Hero -->
+  <header class="hero">
+    <h1>Herb Tracker</h1>
+    <p>Discover, track, and learn about nature’s healing power</p>
+  </header>
+
   <!-- Main Content -->
   <main class="container">
-    <div class="grid">
-      <section>
-        <hgroup>
-          <h2>Track Nature’s Healing Power</h2>
-          <h3>Your guide to herbs, plants, and their uses</h3>
-        </hgroup>
-        <p>
-          Herb Tracker helps you explore and document herbs from around the world. 
-          Learn about their medicinal, culinary, and cultural significance. 
-          Keep track of your personal herbal discoveries all in one place.
-        </p>
-        <figure>
-          <img src="https://images.unsplash.com/photo-1599058917765-d21a5a2575b9?auto=format&fit=crop&w=1200&q=80" alt="Fresh herbs in a garden" />
-          <figcaption>
-            <a href="https://unsplash.com/photos/x8ZStukS2PM" target="_blank">Photo from Unsplash</a>
-          </figcaption>
-        </figure>
 
-        <h3>Medicinal Plants</h3>
-        <p>
-          Discover the healing properties of herbs like chamomile, lavender, and peppermint. 
-          Document how they are used in teas, oils, and remedies.
-        </p>
-        <h3>Culinary Herbs</h3>
-        <p>
-          Basil, rosemary, and thyme bring flavors to life. 
-          Use Herb Tracker to store your favorite recipes and herb pairings.
-        </p>
-      </section>
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="search" id="searchInput" placeholder="Search herbs..." aria-label="Search herbs">
+    </div>
+
+    <!-- Herb Grid -->
+    <div class="card-grid" id="herbGrid">
+      <!-- Herb cards will be injected here by JavaScript -->
     </div>
   </main>
 
   <!-- Subscribe Section -->
-  <section aria-label="Subscribe example">
+  <section id="subscribe" aria-label="Subscribe example">
     <div class="container">
       <article>
         <hgroup>
@@ -72,11 +134,103 @@
   </section>
 
   <!-- Footer -->
-  <footer class="container">
+  <footer>
     <small>
       <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
     </small>
   </footer>
+
+  <!-- Herb Details Modal -->
+  <dialog id="herbModal">
+    <article>
+      <button aria-label="Close" rel="prev" onclick="closeModal()" style="float:right;">✖</button>
+      <h2 id="modalTitle"></h2>
+      <img id="modalImage" src="" alt="">
+      <p id="modalDescription"></p>
+    </article>
+  </dialog>
+
+  <script>
+    const herbs = [
+      {
+        name: "Basil",
+        image: "https://images.unsplash.com/photo-1615484477897-1d8ed6dfa8b6?auto=format&fit=crop&w=800&q=80",
+        description: "A fragrant herb used in cooking and traditional medicine.",
+        details: "Basil is rich in antioxidants and is known to reduce inflammation. Commonly used in Mediterranean dishes like pesto, it has also been valued in Ayurvedic medicine for centuries."
+      },
+      {
+        name: "Mint",
+        image: "https://images.unsplash.com/photo-1599058917765-d21a5a2575b9?auto=format&fit=crop&w=800&q=80",
+        description: "Cooling herb often used in teas, desserts, and remedies.",
+        details: "Mint aids digestion, relieves headaches, and provides a refreshing flavor. It’s popular in herbal teas and as a garnish in many drinks."
+      },
+      {
+        name: "Lavender",
+        image: "https://images.unsplash.com/photo-1622396487110-4a5cae17c16c?auto=format&fit=crop&w=800&q=80",
+        description: "Known for relaxation and calming properties.",
+        details: "Lavender has calming and soothing effects. Often used in aromatherapy, oils, and teas, it may help with sleep and reduce anxiety."
+      },
+      {
+        name: "Rosemary",
+        image: "https://images.unsplash.com/photo-1622396487321-274f2bb53d71?auto=format&fit=crop&w=800&q=80",
+        description: "Aromatic herb used in cooking and memory enhancement.",
+        details: "Rosemary has traditionally been used to improve memory and concentration. It’s also a flavorful addition to roasted dishes and breads."
+      },
+      {
+        name: "Chamomile",
+        image: "https://images.unsplash.com/photo-1622396487922-0e4dc2621c4e?auto=format&fit=crop&w=800&q=80",
+        description: "Popular herbal tea ingredient known for aiding sleep.",
+        details: "Chamomile is gentle and calming. It’s widely consumed as a tea to aid sleep, reduce stress, and soothe digestive issues."
+      }
+    ];
+
+    const herbGrid = document.getElementById('herbGrid');
+    const searchInput = document.getElementById('searchInput');
+    const herbModal = document.getElementById('herbModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalImage = document.getElementById('modalImage');
+    const modalDescription = document.getElementById('modalDescription');
+
+    function displayHerbs(list) {
+      herbGrid.innerHTML = '';
+      list.forEach((herb, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${herb.image}" alt="${herb.name}">
+          <div class="card-content">
+            <h3>${herb.name}</h3>
+            <p>${herb.description}</p>
+            <button onclick="openModal(${index})">Learn More</button>
+          </div>
+        `;
+        herbGrid.appendChild(card);
+      });
+    }
+
+    function filterHerbs() {
+      const query = searchInput.value.toLowerCase();
+      const filtered = herbs.filter(herb => herb.name.toLowerCase().includes(query));
+      displayHerbs(filtered);
+    }
+
+    function openModal(index) {
+      const herb = herbs[index];
+      modalTitle.textContent = herb.name;
+      modalImage.src = herb.image;
+      modalDescription.textContent = herb.details;
+      herbModal.showModal();
+    }
+
+    function closeModal() {
+      herbModal.close();
+    }
+
+    searchInput.addEventListener('input', filterHerbs);
+
+    // initial load
+    displayHerbs(herbs);
+  </script>
 
 </body>
 </html>
